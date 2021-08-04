@@ -1,28 +1,29 @@
-import http, { request } from 'http';
+import http from 'http';
 import url from 'url';
+import { pluarWord } from '../function/pluralWord.js';
+import { SearchForDuplicates } from '../function/wordFrequency.js';
 
-function logRequest(method, url) {
-    console.log(`[${new Date().toISOString()}] ${method} ${url}`);
-}
+
+// function logRequest(method, url) {
+//     console.log(`[${new Date().toISOString()}] ${method} ${url}`);
+// }
 
 const tasks = [{ name: 'Get tasks' }, { name: 'Create tasks' }];
 
 const server = http.createServer((req, res) => {
-    logRequest(req);
-    if (req.url === '/plural') { 
+    let parseUrl = url.parse(req.url, true);
+    if (parseUrl.pathname === '/plural') {
         if (req.method === 'GET') {
-
-        let query = url.parse(req.url, true).query;
-        let id = query.number;
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(id.toISOString());
+            let quantity = parseFloat(parseUrl.query['number']);
+            let words = parseUrl.query['forms'];
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(pluarWord(quantity, words)));
         }
     }
-    else if (req.url === '/headers') { //  /headers - вернуть в ответе все заголовки запроса
+    else if (req.url === '/headers') {
         if (req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(req.headers));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(req.headers));
         }
     }
     else if (req.url === '/tasks') {
@@ -44,6 +45,19 @@ const server = http.createServer((req, res) => {
         else {
             res.writeHead(404, 'Not Found');
             res.end();
+        }
+    }
+    else if (req.url === '/frequency') {
+        if (req.method === 'POST') {
+            const getText = [];
+            req.on('data', chunk => {
+                getText.push(chunk);
+            })
+            req.on('end', () => {
+                let fullText = getText.join('');
+                res.writeHead(201, { 'Content-Type': 'application/json' })
+                res.end(JSON.stringify(SearchForDuplicates(fullText)));
+            })
         }
     }
     else {
