@@ -1,7 +1,7 @@
 import http from 'http';
 import url from 'url';
 import { pluarWord } from '../function/pluralWord.js';
-import { SearchForDuplicates } from '../function/wordFrequency.js';
+import { SearchForDuplicates, numberOfUniqueWords, mostFrequentWord } from '../function/wordFrequency.js';
 
 
 // function logRequest(method, url) {
@@ -54,10 +54,13 @@ const server = http.createServer((req, res) => {
                 getText.push(chunk);
             })
             req.on('end', () => {
-                let fullText = getText.join('');
-                res.writeHead(201, { 'Content-Type': 'application/json' })
-                res.end(JSON.stringify(SearchForDuplicates(fullText)));
-            })
+                let text = getText.join('');
+                //res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.setHeader('Content-Type', 'application/json');
+                res.setHeader('Number-Of-Unique-Words', `${numberOfUniqueWords(text)}`);
+                res.setHeader('Number-Of-Frequent-Words', `${mostFrequentWord(text)}`);
+                res.end(JSON.stringify(Object.fromEntries(SearchForDuplicates(text).entries())));
+            })  
         }
     }
     else {

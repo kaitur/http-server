@@ -7,9 +7,27 @@ export function SearchForDuplicates(text) {
         let count = currentWordCount ? currentWordCount : 0;
         wordMap.set(arrayOfWords[i], count + 1)
     }
-    
-    wordMap.forEach(key, value)
     return wordMap;
+}
+
+export function numberOfUniqueWords(text) {
+    let words = SearchForDuplicates(text);
+    let amount = 0;
+    words.forEach((value) => { if (value === 1) amount++ });
+    return amount;
+}
+
+export function mostFrequentWord(text) {
+    let words = SearchForDuplicates(text);
+    let freqWord = "";
+    let counter = 0
+    words.forEach((value, key) => {
+        if (value > counter) {
+            freqWord = key;
+            counter++;
+        }
+    });
+    return freqWord;
 }
 
 function stringReplacement(text) {
